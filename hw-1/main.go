@@ -1,46 +1,39 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"strconv"
-	"strings"
+	"reflect"
 )
 
-func isNumeric(s string) bool {
-	_, err := strconv.ParseFloat(s, 64)
-	return err == nil
-}
-
-func strUnpack(str string) (string, error) {
-	var ns string
-	prev := ""
-	for _, s := range str {
-
-		cs := string(s)
-		if num, err := strconv.Atoi(string(s)); err == nil {
-			if prev == "" || isNumeric(prev) {
-				return "", errors.New("invalid string")
-			} else {
-				cs = strings.Repeat(prev, num-1) //already printed once
-			}
-		}
-
-		prev = string(s)
-		ns += cs
+func Concat(slices [][]int) []int {
+	var res []int
+	for _, s := range slices {
+		res = append(res, s...)
 	}
-
-	return ns, nil
+	return res
 }
 
 func main() {
-
-	// * "a4bc2d5e" => "aaaabccddddde"
-	// * "abcd" => "abcd"
-	// * "45" => "" (некорректная строка)
-	if test, err := strUnpack("45"); err == nil {
-		fmt.Println(test)
-	} else {
-		fmt.Println(err)
+	type pair struct {
+		s [][]int
+		r []int
+	}
+	test := []pair{
+		{[][]int{{1, 2}, {3, 4}}, []int{1, 2, 3, 4}},
+		{[][]int{{1, 2}, {3, 4}, {6, 5}}, []int{1, 2, 3, 4, 6, 5}},
+		{[][]int{{1, 2}, {}, {6, 5}}, []int{1, 2, 6, 5}},
+	}
+	for _, t := range test {
+		s := t.s
+		r := t.r
+		r2 := Concat(s)
+		fmt.Printf("Test: %v\n", s)
+		fmt.Printf("Expected: %v\n", r)
+		fmt.Printf("Result: %v\n", r2)
+		if reflect.DeepEqual(r, r2) {
+			fmt.Printf("OK\n\n")
+		} else {
+			fmt.Printf("FAIL\n\n")
+		}
 	}
 }
