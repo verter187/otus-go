@@ -1,39 +1,68 @@
 package main
 
-import (
-	"fmt"
-	"reflect"
-)
-
-func Concat(slices [][]int) []int {
-	var res []int
-	for _, s := range slices {
-		res = append(res, s...)
-	}
-	return res
-}
+import "fmt"
 
 func main() {
-	type pair struct {
-		s [][]int
-		r []int
+
+	var cache map[string]string //не инициализированный словарь, nil
+
+	cache1 := map[string]string{} // созданный с помощью литерала, len(cache) == 0
+
+	cache2 := map[string]string{ // литерал с первоначальным значением
+		"one":   "один",
+		"two":   "два",
+		"three": "три",
 	}
-	test := []pair{
-		{[][]int{{1, 2}, {3, 4}}, []int{1, 2, 3, 4}},
-		{[][]int{{1, 2}, {3, 4}, {6, 5}}, []int{1, 2, 3, 4, 6, 5}},
-		{[][]int{{1, 2}, {}, {6, 5}}, []int{1, 2, 6, 5}},
+
+	cache3 := make(map[string]string)      // тоже что и map[string]string
+	cache4 := make(map[string]string, 100) // заранее выделить память на 100 ключей
+
+	fmt.Println(cache, cache1, cache2, cache3, cache4)
+
+	key := "two" //Получение знаения, если ключ не найден - Zero Value
+	value := cache2[key]
+	fmt.Println(value)
+
+	empval := cache[key] // если ключ не найден - Zero Value
+	fmt.Println(empval == "")
+
+	_, ok := cache2[key] // проверить наличие ключа в словаре
+	fmt.Println(ok)
+
+	cache1[key] = value // Записать значение в инициализированный(!) словарь
+	fmt.Println(cache1[key])
+
+	delete(cache, key) // удалить ключ из словаря, работает всегда
+
+	//В go нет функций, возвращающих списки ключей и значений словаря. (Почему?)
+	// Получить ключи
+	var keys []string
+	for key, _ := range cache2 {
+		keys = append(keys, key)
 	}
-	for _, t := range test {
-		s := t.s
-		r := t.r
-		r2 := Concat(s)
-		fmt.Printf("Test: %v\n", s)
-		fmt.Printf("Expected: %v\n", r)
-		fmt.Printf("Result: %v\n", r2)
-		if reflect.DeepEqual(r, r2) {
-			fmt.Printf("OK\n\n")
-		} else {
-			fmt.Printf("FAIL\n\n")
-		}
+
+	fmt.Println(keys)
+
+	// Получить Значения
+	values := make([]string, 0, len(cache))
+	for _, val := range cache2 {
+		values = append(values, val)
 	}
+	fmt.Println(values)
+
+	// Ключом может быть любой тип данных, для которго определена операция сравнения (==):
+	// * строки, числовые типы, булево
+	// * каналы (chan)
+	// * интерфейсы
+	// * указатели
+	// * структуры или массивы, содержащие сравнимые типы
+
+	type User struct {
+		Name string
+		Host string
+	}
+
+	var cache5 map[User][]int
+	fmt.Println(cache5)
+
 }
