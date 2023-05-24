@@ -1,59 +1,60 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+	"sort"
+	"strings"
+	"unicode/utf8"
+)
+
+func Dedupe[T comparable](arr []T) map[T]int {
+	m := make(map[T]int)
+	for _, v := range arr {
+		m[v]++
+	}
+	return m
+}
 
 func main() {
-
-	// ИСПОЛЬЗОВАНИЕ ZIRO VALUES
-
-	//  Для слайсов и словарей, zero value - это nil.
-	// С таким значением будут работать функции и операции, читающие данные, например:
-	key := "test"
-	var seq []string            // nil
-	var cache map[string]string // nil
-	l := len(seq)               // 0
-	c := cap(seq)               // 0
-	l1 := len(cache)            // 0
-	v, ok := cache[key]         // "", false
-
-	fmt.Println(l, l1, c, v, ok)
-	// Для слайсов будут так же работать append:
-	var seq1 []string            // nil
-	seq1 = append(seq1, "hello") // []string{"hello"}
-
-	// УДОБНОЕ ИСПОЛЬЗОВАНИЕ, НАПРИМЕРМ ДЛЯ СЛОВАРЯ СЛАЙСОВ:
-
-	type User struct {
-		Name string
-		Host string
+	// для более мелких файлов
+	filename := "./anna1.txt" //os.Args[1] //"./temp/anna1.txt"
+	fContent, err := os.ReadFile(filename)
+	if err != nil {
+		panic(err)
 	}
 
-	user1 := User{
-		Name: "Jhon",
-		Host: "com",
+	replace_marks_str := "!,.?:;\"-[]()123456789"
+	replace_marks := strings.SplitAfter(replace_marks_str, "")
+	content := string(fContent)
+
+	for _, mark := range replace_marks {
+		content = strings.ReplaceAll(content, mark, "")
 	}
 
-	user2 := User{
-		Name: "Bob",
-		Host: "ru",
+	words := strings.Fields(content)
+
+	fmt.Println(len(words))
+	mWords := Dedupe(words)
+
+	names := make([]string, 0, len(mWords))
+	for name := range mWords {
+
+		if utf8.RuneCountInString(strings.Trim(name, " ")) < 4 {
+			continue
+		}
+
+		names = append(names, name)
 	}
 
-	users := []User{user1, user2}
+	sort.Slice(names, func(i, j int) bool {
+		return mWords[names[i]] > mWords[names[j]]
+	})
 
-	// ВМЕСТО:
-	// hostUsers := map[string][]string{}
-	// for _, user := range users {
-	// 	if _, ok := hostUsers[user.Host]; !ok {
-	// 		hostUsers[user.Host] = make([]string)
-	// 	}
-	// 	hostUsers[user.Host] = append(hostUsers[user.Host], user.Name)
-	// }
-
-	// МОЖНО:
-	hostUsers1 := map[string][]string{}
-	for _, user := range users {
-		hostUsers[user.Host] = append(hostUsers[user.Host], user.Name)
+	for i, name := range names {
+		if i > 9 {
+			break
+		}
+		fmt.Printf("%-7v %v\n", name, mWords[name])
 	}
-
-	fmt.Println(hostUsers1)
 }
