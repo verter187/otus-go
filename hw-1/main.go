@@ -4,65 +4,56 @@ import "fmt"
 
 func main() {
 
-	var cache map[string]string //не инициализированный словарь, nil
+	// ИСПОЛЬЗОВАНИЕ ZIRO VALUES
 
-	cache1 := map[string]string{} // созданный с помощью литерала, len(cache) == 0
+	//  Для слайсов и словарей, zero value - это nil.
+	// С таким значением будут работать функции и операции, читающие данные, например:
+	key := "test"
+	var seq []string            // nil
+	var cache map[string]string // nil
+	l := len(seq)               // 0
+	c := cap(seq)               // 0
+	l1 := len(cache)            // 0
+	v, ok := cache[key]         // "", false
 
-	cache2 := map[string]string{ // литерал с первоначальным значением
-		"one":   "один",
-		"two":   "два",
-		"three": "три",
-	}
+	fmt.Println(l, l1, c, v, ok)
+	// Для слайсов будут так же работать append:
+	var seq1 []string            // nil
+	seq1 = append(seq1, "hello") // []string{"hello"}
 
-	cache3 := make(map[string]string)      // тоже что и map[string]string
-	cache4 := make(map[string]string, 100) // заранее выделить память на 100 ключей
-
-	fmt.Println(cache, cache1, cache2, cache3, cache4)
-
-	key := "two" //Получение знаения, если ключ не найден - Zero Value
-	value := cache2[key]
-	fmt.Println(value)
-
-	empval := cache[key] // если ключ не найден - Zero Value
-	fmt.Println(empval == "")
-
-	_, ok := cache2[key] // проверить наличие ключа в словаре
-	fmt.Println(ok)
-
-	cache1[key] = value // Записать значение в инициализированный(!) словарь
-	fmt.Println(cache1[key])
-
-	delete(cache, key) // удалить ключ из словаря, работает всегда
-
-	//В go нет функций, возвращающих списки ключей и значений словаря. (Почему?)
-	// Получить ключи
-	var keys []string
-	for key, _ := range cache2 {
-		keys = append(keys, key)
-	}
-
-	fmt.Println(keys)
-
-	// Получить Значения
-	values := make([]string, 0, len(cache))
-	for _, val := range cache2 {
-		values = append(values, val)
-	}
-	fmt.Println(values)
-
-	// Ключом может быть любой тип данных, для которго определена операция сравнения (==):
-	// * строки, числовые типы, булево
-	// * каналы (chan)
-	// * интерфейсы
-	// * указатели
-	// * структуры или массивы, содержащие сравнимые типы
+	// УДОБНОЕ ИСПОЛЬЗОВАНИЕ, НАПРИМЕРМ ДЛЯ СЛОВАРЯ СЛАЙСОВ:
 
 	type User struct {
 		Name string
 		Host string
 	}
 
-	var cache5 map[User][]int
-	fmt.Println(cache5)
+	user1 := User{
+		Name: "Jhon",
+		Host: "com",
+	}
 
+	user2 := User{
+		Name: "Bob",
+		Host: "ru",
+	}
+
+	users := []User{user1, user2}
+
+	// ВМЕСТО:
+	// hostUsers := map[string][]string{}
+	// for _, user := range users {
+	// 	if _, ok := hostUsers[user.Host]; !ok {
+	// 		hostUsers[user.Host] = make([]string)
+	// 	}
+	// 	hostUsers[user.Host] = append(hostUsers[user.Host], user.Name)
+	// }
+
+	// МОЖНО:
+	hostUsers1 := map[string][]string{}
+	for _, user := range users {
+		hostUsers[user.Host] = append(hostUsers[user.Host], user.Name)
+	}
+
+	fmt.Println(hostUsers1)
 }
